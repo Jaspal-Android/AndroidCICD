@@ -5,12 +5,11 @@ plugins {
 
 android {
     namespace = "com.atvantiq.androidcicd"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.atvantiq.androidcicd"
         minSdk = 24
-        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
