@@ -15,11 +15,10 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
  lint:
   runs-on: ubuntu-latest
   steps:
-    - name: Checkout code
+    - name: Checkout the code
       uses: actions/checkout@v4
 
     - name: Run Lint
@@ -28,6 +27,6 @@ jobs:
     - name: Upload html test report
       uses: actions/upload-artifact@v3
       with:
-        name: lint-report.html
-        path: app/build/reports/lint-results.html
+        name: index.html
+        path: app/build/reports/lint-results-debug.html
 
