@@ -4,11 +4,9 @@ name: Android CI/CD
 # Trigger the workflow on push or pull request events to the main branch
 on:
   push:
-    branches:
-      - main
+    branches: [ "main", "master", "develop" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main", "master", "develop" ]
 
 # Define environment variables
 env:
@@ -61,6 +59,13 @@ jobs:
       # Step 7: Run lint checks
       - name: Run Lint
         run: ./gradlew lintDebug
+        
+      # Upload HTML Lint Test Report as artifact  
+      - name: Upload HTML Lint Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: index.html
+          path: app/build/reports/lints-results-debug.html
 
       # Step 8: Run unit tests
       - name: Run Unit Tests
