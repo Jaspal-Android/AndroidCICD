@@ -58,6 +58,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    lint {
+        htmlReport = true
+        htmlOutput = file("build/reports/lints-results-debug.html")
+    }
 }
 
 dependencies {
