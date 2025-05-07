@@ -17,4 +17,14 @@ class MainActivity : AppCompatActivity() {
             insets
         }
     }
+
+    fun addTwoNumbers(a: Int, b: Int): Int {
+        return a + b
+    }
+
+    fun subtractTwoNumbers(a: Int, b: Int): Int {
+        return a - b
+    }
+
+
 }
