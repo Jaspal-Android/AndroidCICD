@@ -4,11 +4,9 @@ name: Android CI/CD
 # Trigger the workflow on push or pull request events to the main branch
 on:
   push:
-    branches:
-      - main
+    branches: [ "main", "master", "develop" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main", "master", "develop" ]
 
 # Define environment variables
 env:
@@ -61,6 +59,13 @@ jobs:
       # Step 7: Run lint checks
       - name: Run Lint
         run: ./gradlew lintDebug
+        
+      # Upload HTML Lint Test Report as artifact  
+      - name: Upload HTML Lint Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: index.html
+          path: app/build/reports/lints-results-debug.html
 
       # Step 8: Run unit tests
       - name: Run Unit Tests
@@ -76,3 +81,22 @@ jobs:
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
+     # Step 11: Build Release APK (only on push to main)
+      - name: Build Release APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: ./gradlew assembleRelease
+        env:
+          # Add signing configurations
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+
+      # Step 12: Upload Release APK as artifact
+      - name: Upload Release APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/app-release.apk     
