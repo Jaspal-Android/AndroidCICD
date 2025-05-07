@@ -60,22 +60,65 @@ jobs:
       - name: Run Lint
         run: ./gradlew lintDebug
 
-      # Upload HTML Lint Test Report as artifact
-      - name: Upload HTML Lint Test Report
+      # upload artifact for lint results
+      - name: Upload Lint Results
         uses: actions/upload-artifact@v4
         with:
-          name: lint.html
-          path: app/build/reports/lint-results/lints-results-debug.html
+          name: lint-results
+          path: app/build/reports/lint-results.html
 
       # Step 8: Run unit tests
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
-
-     # Upload Unit Test Report as artifact
+      
+      # Upload Unit Test Report as artifact
       - name: Upload Unit Test Report
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
           path: app/build/reports/tests/testDebugUnitTest/
+      
+      # Step 9: Run UI tests
+      - name: Run UI Tests
+        run: ./gradlew connectedAndroidTest
+      
+      # Upload UI test report as artifact  
+      - name: Upload UI Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-report
+          path: app/build/reports/androidTests/connected/*
+         
+      # Step 10: Build Debug APK
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
-     
+      # Step 11: Upload Debug APK as artifact
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      # Step 12: Build Release APK (only on push to main)
+      - name: Build Release APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: ./gradlew assembleRelease
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+      - name: List build outputs
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "Listing contents of app/build/outputs:"
+          find app/build/outputs -type f || echo "No files found in app/build/outputs"
+      - name: Upload Release APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+
