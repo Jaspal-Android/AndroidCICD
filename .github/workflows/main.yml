@@ -68,8 +68,13 @@ jobs:
           path: app/build/reports/lint-results.html
 
       # Step 8: Run unit tests
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+      - name: Start Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: default
+          arch: x86_64
+          script: ./gradlew connectedDebugAndroidTest
 
       # Upload Unit Test Report as artifact
       - name: Upload Unit Test Report
