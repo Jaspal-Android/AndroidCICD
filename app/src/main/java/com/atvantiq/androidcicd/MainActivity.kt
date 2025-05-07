@@ -18,6 +18,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    fun multiplyNumbers(a: Int, b: Int): Int {
+        return a * b
+    }
+
+    fun divideNumbers(a: Int, b: Int): Int {
+        return a / b
+    }
+
+    fun subtractNumbers(a: Int, b: Int): Int {
+        return a - b
+    }
+
     fun addTwoNumbers(a: Int, b: Int): Int {
         return a + b
     }
