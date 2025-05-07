@@ -87,16 +87,19 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: ./gradlew assembleRelease
         env:
-          # Add signing configurations
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-
-      # Step 12: Upload Release APK as artifact
+      - name: List build outputs
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "Listing contents of app/build/outputs:"
+          find app/build/outputs -type f || echo "No files found in app/build/outputs"
       - name: Upload Release APK
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: app/build/outputs/apk/release/app-release.apk     
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
