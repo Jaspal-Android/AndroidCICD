@@ -22,9 +22,5 @@ class MainActivity : AppCompatActivity() {
         return a + b
     }
 
-    fun subtractTwoNumbers(a: Int, b: Int): Int {
-        return a - b
-    }
-
 
 }
