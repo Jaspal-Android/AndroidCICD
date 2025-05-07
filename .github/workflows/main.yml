@@ -70,25 +70,25 @@ jobs:
       # Step 8: Run unit tests
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
-      
+
       # Upload Unit Test Report as artifact
       - name: Upload Unit Test Report
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
           path: app/build/reports/tests/testDebugUnitTest/
-      
+
       # Step 9: Run UI tests
       - name: Run UI Tests
         run: ./gradlew connectedAndroidTest
-      
-      # Upload UI test report as artifact  
+
+      # Upload UI test report as artifact
       - name: Upload UI Test Report
         uses: actions/upload-artifact@v4
         with:
           name: ui-test-report
           path: app/build/reports/androidTests/connected/*
-         
+
       # Step 10: Build Debug APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug
