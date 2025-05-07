@@ -24,7 +24,7 @@ android {
             val keystoreBase64 = System.getenv("KEYSTORE_FILE")
             storeFile = if (keystoreBase64 != null) {
                 // Create a temporary file to store the decoded keystore
-                val tempKeystoreFile = File.createTempFile("keystore", ".jks")
+                val tempKeystoreFile = File.createTempFile("jeek", ".jks")
                 tempKeystoreFile.writeBytes(keystoreBase64.decodeBase64())
                 tempKeystoreFile
             } else {
