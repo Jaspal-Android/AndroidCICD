@@ -24,7 +24,7 @@ android {
             val keystoreBase64 = System.getenv("KEYSTORE_FILE")
             storeFile = if (keystoreBase64 != null) {
                 // Create a temporary file to store the decoded keystore
-                val tempKeystoreFile = File.createTempFile("jeek", ".jks")
+                val tempKeystoreFile = File.createTempFile("keystore", ".jks")
                 tempKeystoreFile.writeBytes(keystoreBase64.decodeBase64())
                 tempKeystoreFile
             } else {
@@ -35,6 +35,7 @@ android {
             keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
         }
     }
+
 
     buildTypes {
         getByName("release") {
