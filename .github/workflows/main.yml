@@ -16,7 +16,7 @@ env:
 jobs:
   build:
     name: Build and Test
-    runs-on: macos-latest
+    runs-on: ubantu-latest
 
     steps:
       # Step 1: Checkout the repository code
@@ -51,10 +51,14 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
+            
       # Step 6: Make gradlew executable
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      # Run Gradle dependency sync
+      - name: Gradle dependency sync
+        run: ./gradlew dependencies   
 
       # Step 7: Run lint checks
       - name: Run Lint
@@ -81,16 +85,52 @@ jobs:
           name: unit-test-report
           path: app/build/reports/tests/testDebugUnitTest/
 
-      # Step 9: Run UI tests
-      - name: Run UI Tests
-        run: ./gradlew connectedAndroidTest
-
-      # Upload UI test report as artifact
-      - name: Upload UI Test Report
-        uses: actions/upload-artifact@v4
+     # Create and start emulator
+      - name: Create and start emulator
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          name: ui-test-report
-          path: app/build/reports/androidTests/connected/*
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_4
+          script: |
+            echo "Emulator started"
+
+      # Run Espresso UI tests
+      - name: Run UI tests
+        run: ./gradlew connectedAndroidTest --stacktrace
+
+        # Collect test reports
+      - name: Collect test reports
+        if: always()
+        run: |
+          mkdir -p test-reports
+          find . -type f -path "*/build/outputs/androidTest-results/*" -exec cp {} test-reports/ \;
+          find . -type f -path "*/build/reports/*" -exec cp {} test-reports/ \;
+
+      # Collect screenshots (if any)
+      - name: Collect screenshots
+        if: always()
+        run: |
+          mkdir -p screenshots
+          find . -type f -name "*.png" -path "*/screenshots/*" -exec cp {} screenshots/ \;
+
+
+      # Upload test reports as artifacts
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-test-reports
+          path: test-reports/
+
+      # Upload screenshots as artifacts
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-test-screenshots
+          path: screenshots/
 
       # Step 10: Build Debug APK
       - name: Build Debug APK
