@@ -85,36 +85,23 @@ jobs:
           name: unit-test-report
           path: app/build/reports/tests/testDebugUnitTest/
 
-      # Debug ADB and emulator state before starting
-      - name: Debug ADB state
-        run: |
-          echo "ADB version:"
-          adb version
-          echo "ADB devices before emulator start:"
-          adb devices
-          echo "Killing any existing ADB server:"
-          adb kill-server || true
-          adb start-server
-          echo "ADB server restarted"
 
       # Create and start emulator with enhanced stability
       - name: Create and start emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
-          target: google_apis
-          arch: x86_64
-          profile: pixel_4
-          ram-size: 6144M
-          disk-size: 6144M
-          emulator-boot-timeout: 900
-          emulator-options: -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect
-          script: |
-            echo "Waiting for emulator to be ready"
-            adb wait-for-device
-            adb devices
-            echo "Emulator started"
+            api-level: 30
+            target: default
+            arch: x86_64
+            emulator-options: "-no-snapshot -no-boot-anim"
+            script: |
+              adb wait-for-device
+              sleep 60
 
+      - name: Restart ADB Server
+        run: |
+          adb kill-server
+          adb start-server
 
       # Run Espresso UI tests with verbose output
       - name: Run UI tests
@@ -129,13 +116,6 @@ jobs:
           find . -type f -path "*/build/outputs/androidTest-results/*" -exec cp {} test-reports/ \;
           find . -type f -path "*/build/reports/*" -exec cp {} test-reports/ \;
 
-      # Collect screenshots (if any)
-      - name: Collect screenshots
-        if: always()
-        run: |
-          mkdir -p screenshots
-          find . -type f -name "*.png" -path "*/screenshots/*" -exec cp {} screenshots/ \;
-
 
       # Upload test reports as artifacts
       - name: Upload test reports
@@ -145,13 +125,6 @@ jobs:
           name: ui-test-reports
           path: test-reports/
 
-      # Upload screenshots as artifacts
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ui-test-screenshots
-          path: screenshots/
 
       # Step 10: Build Debug APK
       - name: Build Debug APK
