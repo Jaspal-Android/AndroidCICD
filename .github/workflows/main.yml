@@ -51,11 +51,23 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Start Emulator and Run Tests
+      - name: Start Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: '30'
-          script: ./gradlew connectedAndroidTest
+          target: 'default'
+          arch: 'x86_64'
+          emulator-options: '-no-snapshot -no-boot-anim'
+          script: |
+            adb wait-for-device
+            sleep 60
+      - name: Restart ADB Server
+        run: |
+          adb kill-server
+          adb start-server   
+
+      - name: Capture Emulator Logs
+        run: adb logcat > emulator.log     
 
       - name: Upload Instrumentation Test Report
         if: always()
