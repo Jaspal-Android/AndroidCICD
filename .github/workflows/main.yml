@@ -85,7 +85,19 @@ jobs:
           name: unit-test-report
           path: app/build/reports/tests/testDebugUnitTest/
 
-      # Create and start emulator with debugging
+      # Debug ADB and emulator state before starting
+      - name: Debug ADB state
+        run: |
+          echo "ADB version:"
+          adb version
+          echo "ADB devices before emulator start:"
+          adb devices
+          echo "Killing any existing ADB server:"
+          adb kill-server || true
+          adb start-server
+          echo "ADB server restarted"
+
+      # Create and start emulator with enhanced stability
       - name: Create and start emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -93,12 +105,16 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_4
-          ram-size: 4096M
-          disk-size: 4096M
-          emulator-boot-timeout: 600
+          ram-size: 6144M
+          disk-size: 6144M
+          emulator-boot-timeout: 900
+          emulator-options: -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect
           script: |
+            echo "Waiting for emulator to be ready"
+            adb wait-for-device
             adb devices
             echo "Emulator started"
+
 
       # Run Espresso UI tests with verbose output
       - name: Run UI tests
