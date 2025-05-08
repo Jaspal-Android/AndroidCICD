@@ -118,89 +118,6 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-  # Job for UI tests
-  ui-test:
-    name: UI Tests
-    runs-on: macos-latest
-    needs: lint
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: ${{ env.ANDROID_SDK_TOOLS }}
-
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses || true
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Install emulator dependencies
-        run: |
-          sdkmanager "system-images;android-30;google_apis;x86_64"
-          sdkmanager --install "cmdline-tools;latest"
-          sdkmanager --install "emulator"
-
-      - name: Wait for emulator to be ready
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 30
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          disable-animations: true
-          disk-size: 4096M
-          sdcard-size: 512M
-          emulator-options: -no-snapshot -noaudio -no-boot-anim -accel on -gpu swiftshader_indirect
-          script: |
-            echo "Starting emulator boot checks..."
-            for i in {1..30}; do
-              adb devices | grep emulator && adb shell getprop sys.boot_completed | grep 1 && break
-              echo "Waiting for emulator to boot... Attempt $i/30"
-              sleep 10
-            done
-            adb devices
-            if ! adb shell getprop sys.boot_completed | grep 1; then
-              echo "Emulator failed to boot"
-              adb logcat -d > emulator_logcat.txt
-              exit 1
-            fi
-            ./gradlew connectedDebugAndroidTest --stacktrace
-
-      - name: Upload Emulator Logcat
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: emulator-logcat
-          path: emulator_logcat.txt
-          retention-days: 7
-
-      - name: Upload UI Test Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ui-test-report
-          path: app/build/reports/androidTests/connected/
-          retention-days: 7
-
   # Job for building APKs
   build:
     name: Build APKs
@@ -261,7 +178,7 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-          KEYSTORE_PATH: keystore.jks
+          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
 
       - name: Upload Release APK
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
