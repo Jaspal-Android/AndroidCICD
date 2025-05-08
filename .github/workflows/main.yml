@@ -46,18 +46,6 @@ jobs:
       - name: Accept licenses
         run: yes | sdkmanager --licenses
 
-      - name: Install Emulator and System Image
-        run: |
-          sdkmanager "platform-tools" "emulator" "platforms;android-33" "system-images;android-33;google_apis;x86_64"
-          echo "y" | avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64" --device "pixel"
-
-      - name: Start Emulator
-        run: |
-          nohup emulator -avd test_emulator -no-snapshot -no-window -no-audio -gpu swiftshader_indirect > /dev/null 2>&1 &
-          adb wait-for-device
-          adb shell input keyevent 82
-          sleep 30
-
       - name: Grant permission to Gradle wrapper
         run: chmod +x ./gradlew
 
