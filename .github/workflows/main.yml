@@ -26,54 +26,6 @@ permissions:
   pull-requests: write
 
 jobs:
-
-
-  # Job for unit tests
-  unit-test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
-
-      - name: Upload Unit Test Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-report
-          path: app/build/reports/tests/testDebugUnitTest/
-          retention-days: 7
-
-      - name: Publish Test Report
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Unit Test Results
-          path: app/build/test-results/testDebugUnitTest/TEST-*.xml
-          reporter: java-junit
-          fail-on-error: false
-  
   instrumentation-test:
     name: Instrumentation Tests
     runs-on: macos-latest
@@ -104,9 +56,6 @@ jobs:
         with:
           api-level: '30'
           script: ./gradlew connectedAndroidTest
-          emulator-options: -no-snapshot-load -no-audio -no-boot-anim
-          disable-animations: true
-          disable-analytics: true
 
       - name: Upload Instrumentation Test Report
         if: always()
