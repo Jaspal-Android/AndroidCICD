@@ -117,7 +117,7 @@ jobs:
           path: app/build/test-results/testDebugUnitTest/TEST-*.xml
           reporter: java-junit
           fail-on-error: false
-          
+
 
   # Job for building APKs
   build:
@@ -214,4 +214,3 @@ jobs:
           releaseFiles: app/build/outputs/apk/release/*.apk
           track: production
           status: completed
-
