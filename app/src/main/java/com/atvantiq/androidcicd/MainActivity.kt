@@ -26,5 +26,13 @@ class MainActivity : AppCompatActivity() {
         return a - b
     }
 
+    fun multiplyTwoNumbers(a: Int, b: Int): Int {
+        return a * b
+    }
+
+    fun divideNumber()
+    {
+
+    }
 
 }
